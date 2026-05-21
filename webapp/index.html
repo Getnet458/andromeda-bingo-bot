@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Lucy Bingo</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: linear-gradient(180deg, #8B0000 0%, #5C0000 100%);
+            min-height: 100vh;
+            padding: 12px;
+        }
+        .container { max-width: 500px; margin: 0 auto; }
+        .header { text-align: center; margin-bottom: 20px; }
+        .header h1 { color: #FFD700; font-size: 32px; font-weight: bold; text-shadow: 2px 2px 4px rgba(0,0,0,0.3); }
+        .balance-card {
+            background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+            border-radius: 16px;
+            padding: 15px 20px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+        .balance-label { font-size: 14px; color: #5C0000; font-weight: bold; }
+        .balance-amount { font-size: 28px; font-weight: bold; color: #5C0000; }
+        .refresh-btn {
+            background: rgba(92, 0, 0, 0.3);
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            color: #5C0000;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .rooms-table {
+            background: white;
+            border-radius: 16px;
+            overflow: hidden;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+        .table-header {
+            background: #FFD700;
+            display: grid;
+            grid-template-columns: 1fr 0.8fr 0.8fr 1fr 0.8fr;
+            padding: 12px;
+            font-weight: bold;
+            color: #5C0000;
+            font-size: 12px;
+            text-align: center;
+        }
+        .table-row {
+            display: grid;
+            grid-template-columns: 1fr 0.8fr 0.8fr 1fr 0.8fr;
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+            text-align: center;
+            align-items: center;
+        }
+        .play-btn {
+            background: linear-gradient(135deg, #FFD700, #FFA500);
+            border: none;
+            padding: 6px 12px;
+            border-radius: 20px;
+            color: #5C0000;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .selection-page, .game-page {
+            display: none;
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .selection-title {
+            text-align: center;
+            font-size: 20px;
+            font-weight: bold;
+            color: #8B0000;
+            margin-bottom: 20px;
+        }
+        .cartela-input { text-align: center; margin-bottom: 20px; }
+        .cartela-input input {
+            width: 150px;
+            padding: 15px;
+            font-size: 24px;
+            text-align: center;
+            border: 2px solid #FFD700;
+            border-radius: 12px;
+            font-weight: bold;
+        }
+        .random-btn {
+            background: #f0f0f0;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            margin: 10px;
+            cursor: pointer;
+        }
+        .quantity-selector {
+            text-align: center;
+            margin: 15px 0;
+            padding: 15px;
+            background: #f5f5f5;
+            border-radius: 12px;
+        }
+        .quantity-selector button {
+            width: 40px;
+            height: 40px;
+            font-size: 20px;
+            border-radius: 50%;
+            border: none;
+            background: #FFD700;
+            cursor: pointer;
+        }
+        .available-numbers {
+            background: #f5f5f5;
+            border-radius: 12px;
+            padding: 15px;
+            margin: 15px 0;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        .number-badge {
+            display: inline-block;
+            width: 45px;
+            padding: 8px;
+            margin: 4px;
+            background: white;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .number-badge.taken {
+            background: #ddd;
+            color: #999;
+            text-decoration: line-through;
+            cursor: not-allowed;
+        }
+        .number-badge.selected { background: #FFD700; color: #5C0000; }
+        .confirm-btn, .cancel-btn {
+            flex: 1;
+            padding: 12px;
+            border-radius: 25px;
+            font-weight: bold;
+            cursor: pointer;
+            border: none;
+        }
+        .confirm-btn { background: linear-gradient(135deg, #4CAF50, #45a049); color: white; }
+        .cancel-btn { background: #f44336; color: white; }
+        .action-buttons { display: flex; gap: 10px; margin-top: 20px; }
+        .game-number {
+            font-size: 48px;
+            font-weight: bold;
+            color: #FFD700;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+        .game-info-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            gap: 10px;
+        }
+        .info-card {
+            flex: 1;
+            background: #f5f5f5;
+            border-radius: 12px;
+            padding: 12px;
+            text-align: center;
+        }
+        .info-card .value { font-size: 18px; font-weight: bold; }
+        .number-grid {
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            gap: 4px;
+            margin-bottom: 20px;
+            background: #f0f0f0;
+            padding: 8px;
+            border-radius: 12px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        .number-cell {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: white;
+            border-radius: 8px;
+            font-size: 11px;
+            font-weight: bold;
+        }
+        .number-cell.drawn { background: #FFD700; color: #5C0000; }
+        .bingo-card {
+            background: #f5f5f5;
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 20px;
+        }
+        .card-title { text-align: center; font-weight: bold; margin-bottom: 12px; color: #8B0000; }
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 6px;
+        }
+        .card-cell {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: white;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+        .card-cell.marked { background: #FFD700; color: #5C0000; transform: scale(0.95); }
+        .card-cell.free { background: #FFD700; }
+        .number-popup {
+            position: fixed;
+            top: 20%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: linear-gradient(135deg, #FFD700, #FFA500);
+            color: #5C0000;
+            font-size: 80px;
+            font-weight: bold;
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            animation: popupAnimation 0.8s ease-out forwards;
+        }
+        @keyframes popupAnimation {
+            0% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
+            50% { transform: translate(-50%, -50%) scale(1.2); }
+            100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+        }
+        .winner-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.95);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+        .winner-card {
+            background: linear-gradient(135deg, #FFD700, #FFA500);
+            border-radius: 24px;
+            padding: 30px;
+            text-align: center;
+        }
+        .winner-card .amount { font-size: 36px; font-weight: bold; margin: 15px 0; }
+        .footer { text-align: center; padding: 16px; color: rgba(255,255,255,0.7); font-size: 12px; }
+        .error { color: #f44336; text-align: center; padding: 10px; }
+        .cartela-tab { display: inline-block; padding: 5px 10px; margin: 2px; background: #ddd; border-radius: 15px; font-size: 11px; cursor: pointer; }
+        .cartela-tab.active { background: #FFD700; color: #5C0000; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Main Menu -->
+        <div id="mainMenu">
+            <div class="header"><h1>LUCY BINGO</h1></div>
+            <div class="balance-card">
+                <div><div class="balance-label">Balance</div><div class="balance-amount" id="balance">0 ETB</div></div>
+                <button class="refresh-btn" id="refreshBalance">Refresh</button>
+            </div>
+            <button id="dailyBonusBtn" style="width:100%; padding:12px; margin-bottom:15px; background:linear-gradient(135deg,#4CAF50,#45a049); border:none; border-radius:12px; color:white; font-weight:bold; cursor:pointer;">
+                🎁 Claim Daily Bonus (50 ETB)
+            </button>
+            <div class="rooms-table">
+                <div class="table-header">
+                    <div>Stake</div><div>Active</div><div>Players</div><div>Derash</div><div>Play</div>
+                </div>
+                <div id="roomsList">Loading...</div>
+            </div>
+            <div class="footer">© Lucy Bingo 2026 | 80% to Winner</div>
+        </div>
+
+        <!-- Cartela Selection -->
+        <div id="selectionPage" class="selection-page">
+            <div class="selection-title">🎫 Choose Cartela #1 🎫</div>
+            <div class="cartela-input">
+                <input type="number" id="cartelaInput" placeholder="Enter 1-500" min="1" max="500">
+                <br><button class="random-btn" id="randomCartelaBtn">🎲 Random Lucky Number</button>
+            </div>
+            <div class="quantity-selector">
+                <div style="margin-bottom: 8px;">🎫 Number of Cartelas (Max 10)</div>
+                <div style="display: flex; justify-content: center; gap: 15px; align-items: center;">
+                    <button id="decreaseQty">-</button>
+                    <span id="cartelaQuantity" style="font-size: 28px; font-weight: bold; min-width: 60px;">1</span>
+                    <button id="increaseQty">+</button>
+                </div>
+                <div style="margin-top: 8px; font-size: 14px; color: #8B0000; font-weight: bold;">Total: <span id="totalCost">10</span> ETB</div>
+            </div>
+            <div class="available-numbers"><div id="availableNumbersList"></div></div>
+            <div id="selectionError" class="error"></div>
+            <div class="action-buttons">
+                <button class="cancel-btn" id="cancelSelection">Cancel</button>
+                <button class="confirm-btn" id="confirmSelection">Confirm & Play</button>
+            </div>
+        </div>
+
+        <!-- Game Page -->
+        <div id="gamePage" class="game-page">
+            <div class="game-number" id="gameNumber">13</div>
+            <div class="game-info-row">
+                <div class="info-card"><div>💰 Wallet</div><div class="value" id="gameBalance">0 ETB</div></div>
+                <div class="info-card"><div>🎲 Stake</div><div class="value" id="stakeAmount">10 ETB</div></div>
+                <div class="info-card"><div>🏆 Prize Pool</div><div class="value" id="prizePool">0 ETB</div></div>
+            </div>
+            <div class="number-grid" id="numberGrid"></div>
+            <div class="cartela-selector" id="cartelaSelector"></div>
+            <div class="bingo-card">
+                <div class="card-title">Cartela #<span id="cartelaNumber">378</span></div>
+                <div class="card-grid" id="bingoGrid"></div>
+            </div>
+            <button class="play-btn" id="backToMenu" style="width:100%; margin-top:10px;">← Exit Game</button>
+        </div>
+    </div>
+
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.ready();
+        tg.expand();
+
+        let currentUser = null;
+        let currentGame = null;
+        let currentCartelas = [];
+        let activeCartelaIndex = 0;
+        let selectedStake = null;
+        let selectedCartelaNumber = null;
+        let cartelaQuantity = 1;
+        let pollingInterval = null;
+        let availableCartelas = [];
+        let lastNumberCount = 0;
+        const maxCartelas = 10;
+
+        // Use relative URLs - they work automatically with ngrok
+        const API_BASE = '';
+
+        async function init() {
+            if (tg.initDataUnsafe?.user) {
+                currentUser = tg.initDataUnsafe.user;
+            } else {
+                currentUser = { id: Math.floor(Math.random() * 1000000), first_name: 'Player' };
+            }
+            await loadGameRooms();
+            await updateBalance();
+        }
+
+        async function loadGameRooms() {
+            try {
+                const res = await fetch('/api/rooms', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ user_id: currentUser.id })
+                });
+                const data = await res.json();
+                renderGameRooms(data.rooms);
+                document.getElementById('balance').innerText = data.balance + ' ETB';
+            } catch (err) { 
+                console.error('Load rooms error:', err);
+                document.getElementById('roomsList').innerHTML = '<div style="padding:20px;text-align:center">Connection error. Make sure Flask is running!</div>';
+            }
+        }
+
+        function renderGameRooms(rooms) {
+            const container = document.getElementById('roomsList');
+            container.innerHTML = '';
+            rooms.forEach(room => {
+                const row = document.createElement('div');
+                row.className = 'table-row';
+                row.innerHTML = `
+                    <div>${room.stake} ETB</div>
+                    <div style="color:${room.status.includes('s') ? '#4CAF50' : '#FF9800'}">${room.status}</div>
+                    <div>${room.players}</div>
+                    <div>${room.prize_pool} ETB</div>
+                    <div><button class="play-btn" data-stake="${room.stake}">Play</button></div>
+                `;
+                container.appendChild(row);
+            });
+            document.querySelectorAll('.play-btn').forEach(btn => {
+                btn.addEventListener('click', () => showCartelaSelection(parseInt(btn.dataset.stake)));
+            });
+        }
+
+        async function updateBalance() {
+            try {
+                const res = await fetch('/api/balance', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ user_id: currentUser.id })
+                });
+                const data = await res.json();
+                document.getElementById('balance').innerText = data.balance + ' ETB';
+                return data.balance;
+            } catch (err) { return 0; }
+        }
+
+        async function showCartelaSelection(stake) {
+            selectedStake = stake;
+            cartelaQuantity = 1;
+            document.getElementById('cartelaQuantity').innerText = '1';
+            document.getElementById('totalCost').innerText = stake;
+            document.querySelector('.selection-title').innerHTML = '🎫 Choose Cartela #1 🎫';
+            
+            try {
+                const res = await fetch('/api/available_cartelas', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ user_id: currentUser.id, stake })
+                });
+                const data = await res.json();
+                availableCartelas = data.available_numbers || [];
+                renderAvailableNumbers();
+                document.getElementById('mainMenu').style.display = 'none';
+                document.getElementById('selectionPage').style.display = 'block';
+                document.getElementById('gamePage').style.display = 'none';
+            } catch (err) { 
+                console.error('Show cartela error:', err);
+                tg.showPopup({ title: 'Error', message: 'Could not load cartela numbers. Make sure Flask is running!', buttons: [{ type: 'ok' }] });
+            }
+        }
+
+        function renderAvailableNumbers() {
+            const container = document.getElementById('availableNumbersList');
+            container.innerHTML = '';
+            for (let i = 1; i <= 100; i++) {
+                const taken = availableCartelas.includes(i);
+                const div = document.createElement('div');
+                div.className = 'number-badge' + (taken ? ' taken' : '');
+                div.textContent = i;
+                if (!taken) div.onclick = () => selectCartelaNumber(i);
+                container.appendChild(div);
+            }
+        }
+
+        function selectCartelaNumber(num) {
+            if (availableCartelas.includes(num)) {
+                document.getElementById('selectionError').innerText = '❌ Taken! Pick another.';
+                return;
+            }
+            selectedCartelaNumber = num;
+            document.getElementById('cartelaInput').value = num;
+            document.querySelectorAll('.number-badge').forEach(b => b.classList.remove('selected'));
+            if (event?.target) event.target.classList.add('selected');
+            document.getElementById('selectionError').innerText = '';
+        }
+
+        document.getElementById('decreaseQty')?.addEventListener('click', () => {
+            if (cartelaQuantity > 1) {
+                cartelaQuantity--;
+                document.getElementById('cartelaQuantity').innerText = cartelaQuantity;
+                document.getElementById('totalCost').innerText = selectedStake * cartelaQuantity;
+                document.querySelector('.selection-title').innerHTML = `🎫 Choose Cartela #${cartelaQuantity} 🎫`;
+            }
+        });
+
+        document.getElementById('increaseQty')?.addEventListener('click', () => {
+            if (cartelaQuantity < maxCartelas) {
+                cartelaQuantity++;
+                document.getElementById('cartelaQuantity').innerText = cartelaQuantity;
+                document.getElementById('totalCost').innerText = selectedStake * cartelaQuantity;
+                document.querySelector('.selection-title').innerHTML = `🎫 Choose Cartela #${cartelaQuantity} 🎫`;
+            }
+        });
+
+        document.getElementById('randomCartelaBtn')?.addEventListener('click', () => {
+            for (let i = 1; i <= 100; i++) {
+                if (!availableCartelas.includes(i)) {
+                    selectCartelaNumber(i);
+                    break;
+                }
+            }
+        });
+
+        document.getElementById('confirmSelection')?.addEventListener('click', async () => {
+            if (!selectedCartelaNumber && cartelaQuantity === 1) {
+                document.getElementById('selectionError').innerText = '❌ Select a Cartela number!';
+                return;
+            }
+            
+            // Show loading state
+            const confirmBtn = document.getElementById('confirmSelection');
+            const originalText = confirmBtn.innerText;
+            confirmBtn.innerText = 'Joining...';
+            confirmBtn.disabled = true;
+            
+            try {
+                const res = await fetch('/api/join', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        user_id: currentUser.id,
+                        stake: selectedStake,
+                        username: currentUser.first_name,
+                        cartela_number: selectedCartelaNumber,
+                        quantity: cartelaQuantity
+                    })
+                });
+                
+                const data = await res.json();
+                
+                if (res.ok) {
+                    currentGame = data.game;
+                    if (data.cartelas) {
+                        currentCartelas = data.cartelas;
+                    } else if (data.cartela) {
+                        currentCartelas = [data.cartela];
+                    }
+                    activeCartelaIndex = 0;
+                    
+                    document.getElementById('selectionPage').style.display = 'none';
+                    document.getElementById('gamePage').style.display = 'block';
+                    
+                    renderGame();
+                    startPolling();
+                    
+                    tg.showPopup({ 
+                        title: '✅ Joined!', 
+                        message: `You bought ${currentCartelas.length} cartela(s)!\nTotal: ${selectedStake * cartelaQuantity} ETB`, 
+                        buttons: [{ type: 'ok' }] 
+                    });
+                } else {
+                    document.getElementById('selectionError').innerText = data.error || 'Failed to join';
+                }
+            } catch (err) {
+                console.error('Join error:', err);
+                document.getElementById('selectionError').innerText = 'Connection error: ' + err.message;
+                tg.showPopup({ title: 'Error', message: 'Connection to server failed. Make sure Flask is running!', buttons: [{ type: 'ok' }] });
+            } finally {
+                confirmBtn.innerText = originalText;
+                confirmBtn.disabled = false;
+            }
+        });
+
+        document.getElementById('cancelSelection')?.addEventListener('click', () => {
+            document.getElementById('mainMenu').style.display = 'block';
+            document.getElementById('selectionPage').style.display = 'none';
+        });
+
+        document.getElementById('backToMenu')?.addEventListener('click', () => {
+            if (pollingInterval) clearInterval(pollingInterval);
+            document.getElementById('mainMenu').style.display = 'block';
+            document.getElementById('gamePage').style.display = 'none';
+            loadGameRooms();
+            updateBalance();
+        });
+
+        document.getElementById('refreshBalance')?.addEventListener('click', updateBalance);
+
+        document.getElementById('dailyBonusBtn')?.addEventListener('click', async () => {
+            try {
+                const res = await fetch('/api/daily_bonus', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ user_id: currentUser.id })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    await updateBalance();
+                    tg.showPopup({ title: '🎁 Daily Bonus!', message: data.message, buttons: [{ type: 'ok' }] });
+                } else {
+                    tg.showPopup({ title: 'Already Claimed', message: data.message, buttons: [{ type: 'ok' }] });
+                }
+            } catch (err) { console.error(err); }
+        });
+
+        function renderGame() {
+            if (!currentGame || !currentCartelas.length) return;
+            
+            document.getElementById('gameNumber').innerText = currentGame.game_number || '13';
+            document.getElementById('gameBalance').innerText = currentGame.balance + ' ETB';
+            document.getElementById('stakeAmount').innerText = currentGame.stake + ' ETB';
+            if (currentGame.prize_pool) document.getElementById('prizePool').innerText = currentGame.prize_pool + ' ETB';
+
+            // Render number grid
+            const grid = document.getElementById('numberGrid');
+            grid.innerHTML = '';
+            const drawn = currentGame.drawn_numbers || [];
+            for (let i = 1; i <= 75; i++) {
+                const cell = document.createElement('div');
+                cell.className = 'number-cell';
+                if (drawn.includes(i)) cell.classList.add('drawn');
+                cell.textContent = i;
+                grid.appendChild(cell);
+            }
+            
+            // Render cartela tabs
+            const selector = document.getElementById('cartelaSelector');
+            selector.innerHTML = '';
+            currentCartelas.forEach((c, idx) => {
+                const tab = document.createElement('div');
+                tab.className = 'cartela-tab' + (idx === activeCartelaIndex ? ' active' : '');
+                tab.textContent = `#${c.cartela_number}`;
+                tab.onclick = () => {
+                    activeCartelaIndex = idx;
+                    renderActiveCartela();
+                    document.querySelectorAll('.cartela-tab').forEach((t, i) => {
+                        t.classList.toggle('active', i === activeCartelaIndex);
+                    });
+                };
+                selector.appendChild(tab);
+            });
+            
+            renderActiveCartela();
+        }
+
+        function renderActiveCartela() {
+            if (!currentCartelas[activeCartelaIndex]) return;
+            const cartela = currentCartelas[activeCartelaIndex];
+            document.getElementById('cartelaNumber').innerText = cartela.cartela_number;
+            
+            const bingo = document.getElementById('bingoGrid');
+            bingo.innerHTML = '';
+            cartela.card.forEach((row, i) => {
+                row.forEach((val, j) => {
+                    const cell = document.createElement('div');
+                    cell.className = 'card-cell';
+                    if (val === '★') { cell.classList.add('free'); cell.textContent = '★'; }
+                    else cell.textContent = val;
+                    if (cartela.marked?.[i]?.[j]) cell.classList.add('marked');
+                    bingo.appendChild(cell);
+                });
+            });
+        }
+
+        function showNumberPopup(number) {
+            const existing = document.querySelector('.number-popup');
+            if (existing) existing.remove();
+            const popup = document.createElement('div');
+            popup.className = 'number-popup';
+            popup.textContent = number;
+            document.body.appendChild(popup);
+            setTimeout(() => popup.remove(), 800);
+            if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+        }
+
+        function startPolling() {
+            if (pollingInterval) clearInterval(pollingInterval);
+            pollingInterval = setInterval(async () => {
+                if (!currentGame) return;
+                try {
+                    const res = await fetch('/api/game_status', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ user_id: currentUser.id, game_id: currentGame.game_id })
+                    });
+                    const data = await res.json();
+                    if (data.game_completed) {
+                        clearInterval(pollingInterval);
+                        if (data.won) {
+                            showWinner(data.win_amount);
+                            await updateBalance();
+                            tg.showPopup({ title: '🎉 BINGO!', message: `You won ${data.win_amount} ETB!` });
+                        } else if (data.winner_info) {
+                            tg.showPopup({ title: '🏆 Game Over', message: `${data.winner_info.username} won ${data.winner_info.amount} ETB!` });
+                        }
+                        setTimeout(() => document.getElementById('backToMenu').click(), 5000);
+                    } else {
+                        if (data.game?.drawn_numbers?.length > lastNumberCount) {
+                            showNumberPopup(data.game.drawn_numbers[data.game.drawn_numbers.length - 1]);
+                            lastNumberCount = data.game.drawn_numbers.length;
+                        }
+                        if (data.game) currentGame = data.game;
+                        if (data.cartelas) currentCartelas = data.cartelas;
+                        else if (data.cartela) currentCartelas = [data.cartela];
+                        renderGame();
+                        document.getElementById('gameBalance').innerText = (currentGame?.balance || 0) + ' ETB';
+                    }
+                } catch (err) { console.error(err); }
+            }, 2000);
+        }
+
+        function showWinner(amount) {
+            const overlay = document.createElement('div');
+            overlay.className = 'winner-overlay';
+            overlay.innerHTML = `
+                <div class="winner-card">
+                    <h2>🎉 BINGO! 🎉</h2>
+                    <div>${currentUser.first_name} won!</div>
+                    <div class="amount">${amount} Birr</div>
+                    <button onclick="this.parentElement.parentElement.remove()" style="padding:10px 20px;">OK</button>
+                </div>
+            `;
+            document.body.appendChild(overlay);
+        }
+
+        init();
+    </script>
+</body>
+</html>
