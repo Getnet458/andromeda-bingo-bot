@@ -6,7 +6,7 @@ from telegram.ext import Application, CommandHandler, CallbackQueryHandler, Cont
 
 # ========== CONFIGURATION - UPDATE THESE 3 LINES! ==========
 BOT_TOKEN = "8423271349:AAGIeHFDKh4-phGJ_W9ao65N-YlDgZSyS10"  # Get from @BotFather on Telegram
-WEBAPP_URL = "https://agreeing-stainable-unskilled.ngrok-free.dev"  # Your ngrok URL
+WEBAPP_URL = "https://andromeda-bingo-bot-2.onrender.com"  # Your render URL
 OWNER_ID = 840648715  # Your Telegram ID (get from @userinfobot)
 
 logging.basicConfig(level=logging.INFO)
