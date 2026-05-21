@@ -1,17 +1,23 @@
 services:
+  # Web service for Flask API
   - type: web
-    name: andromed-bingo-api
+    name: andromeda-bingo-api
     runtime: python
+    repo: https://github.com/Getnet458/andromeda-bingo-bot
+    plan: free
+    branch: main
     buildCommand: pip install -r requirements.txt
-    startCommand: python webapp_server.py
+    startCommand: gunicorn webapp_server:app --bind 0.0.0.0:$PORT
     envVars:
       - key: PYTHON_VERSION
         value: 3.10.0
-    ports:
-      - port: 5000
 
+  # Worker service for Telegram Bot
   - type: worker
-    name: lucy-bingo-bot
+    name: andromeda-bingo-bot
     runtime: python
+    repo: https://github.com/Getnet458/andromeda-bingo-bot
+    plan: free
+    branch: main
     buildCommand: pip install -r requirements.txt
     startCommand: python advanced_bot.py
