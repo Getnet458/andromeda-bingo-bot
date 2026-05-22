@@ -8,9 +8,9 @@ from telegram.ext import Application, CommandHandler, CallbackQueryHandler, Cont
 from telegram.error import Conflict
 
 # ========== CONFIGURATION - READ FROM ENVIRONMENT ==========
-BOT_TOKEN = os.environ.get("BOT_TOKEN", "YOUR_BOT_TOKEN_HERE")
-WEBAPP_URL = os.environ.get("WEBAPP_URL", "https://your-api.onrender.com")
-OWNER_ID = int(os.environ.get("OWNER_ID", "123456789"))
+BOT_TOKEN = os.environ.get("BOT_TOKEN", "8423271349:AAGIeHFDKh4-phGJ_W9ao65N-YlDgZSyS10")
+WEBAPP_URL = os.environ.get("WEBAPP_URL", "https://andromeda-bingo-bot.onrender.com")
+OWNER_ID = int(os.environ.get("OWNER_ID", " 840648715"))
 
 logging.basicConfig(
     level=logging.INFO,
